@@ -85,6 +85,13 @@ void File::openOutputFile(ofstream &outputFile, string outputFileName)
 //  REMARKS:
 //      - the stream is not closed afterwards.
 //
+//  EXAMPLE:  ifstream inputFile;
+//            File::openInputFile(inputFile, "myfile.txt");
+//            unsigned long Nrows;
+//            int Ncols;
+//            File::sniffFile(inputFile, Nrows, Ncols);
+//            ArrayXXd data = File::arrayXXdFromFile(inputFile, Nrows, Ncols);
+//            inputFile.close();
 
 ArrayXXd File::arrayXXdFromFile(ifstream &inputFile, const unsigned long Nrows, const int Ncols, char separator, char commentChar)
 {
