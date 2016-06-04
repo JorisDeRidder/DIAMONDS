@@ -17,7 +17,7 @@
 #include "UniformPrior.h"
 #include "NormalPrior.h"
 #include "SuperGaussianPrior.h"
-#include "GridPrior.h"
+#include "GridUniformPrior.h"
 
 using namespace std;
 using namespace Eigen;
@@ -75,7 +75,7 @@ int main()
 
     // The enlargement fraction (it is the fraction by which each axis of an ellipsoid is enlarged)
 
-    double enlargementFraction = 1.50;  
+    double enlargementFraction = 3.00;  
     
     
     // Compute "sorted indices" such that clusterIndices[sortedindices[k]] <= clusterIndices[sortedIndices[k+1]]
@@ -161,11 +161,13 @@ int main()
     // The indices are kept in an unordered_set<> which automatically takes care
     // that there are no duplicates.  
 
+    bool ellipsoidMatrixDecompositionIsSuccessful;
+
     for (int i = 0; i < Nellipsoids-1; ++i)
     {
         for (int j = i+1; j < Nellipsoids; ++j)
         {
-            if (ellipsoids[i].overlapsWith(ellipsoids[j]))
+            if (ellipsoids[i].overlapsWith(ellipsoids[j], ellipsoidMatrixDecompositionIsSuccessful))
             {
                 overlappingEllipsoidsIndices[i].insert(j);
                 overlappingEllipsoidsIndices[j].insert(i);
@@ -247,10 +249,11 @@ int main()
 
     // ------ Set up prior distributions on each coordinate ------
     
-    int Npoints = 1000;    
+    int Npoints = 10000;    
     ArrayXXd sampleOfDrawnPoints(Npoints,Ndimensions);
     ArrayXd drawnPoint(Ndimensions);
    
+    /*      MIX PRIOR       UNIFORM-GRID UNIFORM-UNIFORM
     vector<Prior*> ptrPriors(3);
     ArrayXd parametersMinima(1);
     ArrayXd parametersMaxima(1);
@@ -259,36 +262,38 @@ int main()
     UniformPrior uniformPrior1(parametersMinima, parametersMaxima);
     ptrPriors[0] = &uniformPrior1;  
 
-    ArrayXd parametersWidth(1);
-    ArrayXd parametersSeparation(1);
     ArrayXd parametersStartingCoordinate(1);
-    ArrayXd parametersNsteps(1);
-    parametersWidth << 0.2;
-    parametersSeparation << 1.0;
+    ArrayXd parametersNgridPoints(1);
+    ArrayXd parametersSeparation(1);
+    ArrayXd parametersTolerance(1);
     parametersStartingCoordinate << 0.0;
-    parametersNsteps << 6;
-    GridPrior gridPrior(parametersWidth, parametersSeparation, parametersStartingCoordinate, parametersNsteps);
-    ptrPriors[1] = &gridPrior;  
-    
+    parametersNgridPoints << 6;
+    parametersSeparation << 0.5;
+    parametersTolerance << 0.1;
+    GridUniformPrior gridUniformPrior(parametersStartingCoordinate, parametersNgridPoints, parametersSeparation, parametersTolerance);
+    ptrPriors[0] = &gridUniformPrior;  
+
     parametersMinima <<  0.0;
     parametersMaxima << 4.0;
     UniformPrior uniformPrior2(parametersMinima, parametersMaxima);
     ptrPriors[2] = &uniformPrior2;  
-    /*
+    */
+
+    /*      MIX PRIOR       NORMAL-UNIFORM-NORMAL
     vector<Prior*> ptrPriors(3);
-    ArrayXd parametersMinima(1);
-    ArrayXd parametersMaxima(1);
-    parametersMinima <<  0.0;
-    parametersMaxima << 4.0;
-    UniformPrior uniformPrior(parametersMinima, parametersMaxima);
-    ptrPriors[1] = &uniformPrior;  
-    
     ArrayXd parametersMean(1);
     ArrayXd parametersSDV(1);
     parametersMean <<  2.0;
     parametersSDV << 0.4;
     NormalPrior normalPrior1(parametersMean, parametersSDV);
     ptrPriors[0] = &normalPrior1;  
+    
+    ArrayXd parametersMinima(1);
+    ArrayXd parametersMaxima(1);
+    parametersMinima <<  0.0;
+    parametersMaxima << 4.0;
+    UniformPrior uniformPrior(parametersMinima, parametersMaxima);
+    ptrPriors[1] = &uniformPrior;  
 
     parametersMean <<  2.0;
     parametersSDV << 0.4;
@@ -296,7 +301,7 @@ int main()
     ptrPriors[2] = &normalPrior2;  
     */
     
-/*
+    /*      UNIFORM PRIOR       */
     vector<Prior*> ptrPriors(1);
     ArrayXd parametersMinima(Ndimensions);
     ArrayXd parametersMaxima(Ndimensions);
@@ -304,25 +309,26 @@ int main()
     parametersMaxima << 4.0, 4.0, 4.0;
     UniformPrior uniformPrior(parametersMinima, parametersMaxima);
     ptrPriors[0] = &uniformPrior;  
-*/  
 
-/*
+
+    /*      GAUSSIAN PRIOR
     vector<Prior*> ptrPriors(1);
     ArrayXd parametersMean(Ndimensions);
     ArrayXd parametersSDV(Ndimensions);
     parametersMean <<  2.0, 2.0, 2.0;
-    parametersSDV << 0.3, 0.6, 0.3;
+    parametersSDV << 0.2, 0.4, 0.2;
     NormalPrior normalPrior(parametersMean, parametersSDV);
     ptrPriors[0] = &normalPrior;
-*/  
-    /*
+    */  
+    
+    /*      SUPER GAUSSIAN PRIOR
     vector<Prior*> ptrPriors(1);
     ArrayXd parametersMean(Ndimensions);
     ArrayXd parametersSDV(Ndimensions);
     ArrayXd parametersWOP(Ndimensions);
     parametersMean <<  2.0, 2.0, 2.0;
-    parametersSDV << 0.2, 0.2, 0.1;
-    parametersWOP << 0.5, 1.0, 0.5;
+    parametersSDV << 0.1, 0.2, 0.3;
+    parametersWOP << 0.4, 0.4, 0.4;
     SuperGaussianPrior superGaussianPrior(parametersMean, parametersSDV, parametersWOP);
     ptrPriors[0] = &superGaussianPrior;  
     */

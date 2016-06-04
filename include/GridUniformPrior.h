@@ -1,12 +1,12 @@
 // Derived class for uniform prior computations
-// Created by Enrico Corsaro @ IvS - 6 March 2013
+// Created by Enrico Corsaro - November 2015
 // e-mail: emncorsaro@gmail.com
-// Header file "GridPrior.h"
-// Implementations contained in "GridPrior.cpp"
+// Header file "GridUniformPrior.h"
+// Implementations contained in "GridUniformPrior.cpp"
 
 
-#ifndef GRIDPRIOR_H
-#define GRIDPRIOR_H
+#ifndef GRIDUNIFORMPRIOR_H
+#define GRIDUNIFORMPRIOR_H
 
 #include <iostream>
 #include <limits>
@@ -20,18 +20,19 @@ typedef Eigen::Ref<Eigen::ArrayXd> RefArrayXd;
 typedef Eigen::Ref<Eigen::ArrayXXd> RefArrayXXd;
 
 
-class GridPrior : public Prior
+class GridUniformPrior : public Prior
 {
 
     public:
 
-        GridPrior(const RefArrayXd width, const RefArrayXd separation, const RefArrayXd startingCoordinate, const RefArrayXd Nsteps);
-        ~GridPrior();
+        GridUniformPrior(const RefArrayXd startingCoordinate, const RefArrayXd NgridPoints, const RefArrayXd separation, 
+                         const RefArrayXd tolerance);
+        ~GridUniformPrior();
 
-        ArrayXd getWidth();
-        ArrayXd getSeparation();
         ArrayXd getStartingCoordinate();
-        ArrayXd getNsteps();
+        ArrayXd getNgridPoints();
+        ArrayXd getSeparation();
+        ArrayXd getTolerance();
 
         virtual double logDensity(RefArrayXd const x, const bool includeConstantTerm = false);
         virtual bool drawnPointIsAccepted(RefArrayXd const drawnPoint);
@@ -44,10 +45,10 @@ class GridPrior : public Prior
 
         uniform_real_distribution<> uniform;
         vector<uniform_int_distribution<>> uniformIntegerVector;
-        ArrayXd width;
-        ArrayXd separation;
         ArrayXd startingCoordinate;
-        ArrayXd Nsteps;
+        ArrayXd NgridPoints;
+        ArrayXd separation;
+        ArrayXd tolerance;
 
 };
 
